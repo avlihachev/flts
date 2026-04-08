@@ -4,6 +4,7 @@ __pycache__/
 *.egg-info/
 dist/
 build/
+!src/flts/web/frontend/dist/
 .venv/
 .pytest_cache/
 .superpowers/
