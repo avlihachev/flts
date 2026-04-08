@@ -4,7 +4,8 @@ import uuid
 from pathlib import Path
 
 from dotenv import load_dotenv
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from flts.web.telegram_handler import handle_telegram_message
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
@@ -94,6 +95,13 @@ async def api_history(origin: str, destination: str, days: int = 30):
     result = get_price_history(conn, origin.upper(), destination.upper(), days_back=days)
     conn.close()
     return result
+
+
+@app.post("/api/telegram/webhook")
+async def telegram_webhook(request: Request):
+    data = await request.json()
+    asyncio.create_task(handle_telegram_message(data))
+    return {"ok": True}
 
 
 # serve frontend (must be last)
