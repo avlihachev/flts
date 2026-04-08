@@ -25,6 +25,16 @@ def monitor():
 
 
 @cli.command()
+@click.option("--port", default=8000, help="Port to listen on")
+@click.option("--host", default="127.0.0.1", help="Host to bind to")
+def serve(port, host):
+    """Start web server (web UI + Telegram webhook)"""
+    import uvicorn
+    from flts.web.server import app
+    uvicorn.run(app, host=host, port=port)
+
+
+@cli.command()
 def watches():
     """List active price watches"""
     from flts.db.models import get_connection, list_watches
