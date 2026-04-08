@@ -1,4 +1,5 @@
 import json
+import sys
 from pathlib import Path
 from typing import Any
 
@@ -6,6 +7,10 @@ import yaml
 from claude_agent_sdk import tool
 
 from fli.models import Airport
+
+
+def _log(msg: str) -> None:
+    print(msg, file=sys.stderr, flush=True)
 
 DATA_DIR = Path(__file__).parent.parent.parent / "data"
 
@@ -25,6 +30,7 @@ DATA_DIR = Path(__file__).parent.parent.parent / "data"
     },
 )
 async def resolve_airport_tool(args: dict[str, Any]) -> dict[str, Any]:
+    _log(f"🔍 resolve_airport: '{args['query']}'")
     query = args["query"].strip().upper()
     matches = []
 
@@ -40,10 +46,12 @@ async def resolve_airport_tool(args: dict[str, Any]) -> dict[str, Any]:
             matches.append({"code": ap.name, "name": ap.value})
 
     if not matches:
+        _log(f"  ✗ resolve_airport: no matches")
         return {"content": [{"type": "text", "text": f"No airports found for '{args['query']}'"}]}
 
-    # limit to 20 results
     matches = matches[:20]
+    codes = [m["code"] for m in matches[:5]]
+    _log(f"  ✓ resolve_airport: {len(matches)} matches — {', '.join(codes)}")
     return {"content": [{"type": "text", "text": json.dumps(matches, ensure_ascii=False, indent=2)}]}
 
 
@@ -63,6 +71,7 @@ async def resolve_airport_tool(args: dict[str, Any]) -> dict[str, Any]:
     },
 )
 async def get_destinations_tool(args: dict[str, Any]) -> dict[str, Any]:
+    _log(f"🔍 get_destinations: {args['category']}")
     yaml_path = DATA_DIR / "destinations.yaml"
 
     try:
@@ -77,4 +86,5 @@ async def get_destinations_tool(args: dict[str, Any]) -> dict[str, Any]:
         return {"content": [{"type": "text", "text": f"Unknown category '{category}'. Available: {available}"}], "is_error": True}
 
     destinations = data[category]
+    _log(f"  ✓ get_destinations: {len(destinations)} destinations in '{category}'")
     return {"content": [{"type": "text", "text": json.dumps(destinations, ensure_ascii=False, indent=2)}]}

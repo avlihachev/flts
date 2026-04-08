@@ -1,7 +1,12 @@
 import json
+import sys
 from typing import Any
 
 from claude_agent_sdk import tool
+
+
+def _log(msg: str) -> None:
+    print(msg, file=sys.stderr, flush=True)
 
 from flts.db.models import get_connection, get_price_history as db_get_price_history
 
@@ -21,6 +26,7 @@ from flts.db.models import get_connection, get_price_history as db_get_price_his
     },
 )
 async def get_price_history_tool(args: dict[str, Any]) -> dict[str, Any]:
+    _log(f"📊 get_price_history: {args['origin']}→{args['destination']}")
     conn = get_connection()
     history = db_get_price_history(
         conn,
@@ -32,9 +38,11 @@ async def get_price_history_tool(args: dict[str, Any]) -> dict[str, Any]:
     conn.close()
 
     if not history:
+        _log(f"  ✗ get_price_history: no data")
         return {"content": [{"type": "text", "text": f"No price history for {args['origin']}→{args['destination']}."}]}
 
     prices = [h["price"] for h in history]
+    _log(f"  ✓ get_price_history: {len(history)} entries, {min(prices):.0f}–{max(prices):.0f}")
     summary = {
         "route": f"{args['origin']}→{args['destination']}",
         "entries": len(history),

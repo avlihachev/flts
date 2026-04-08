@@ -1,6 +1,11 @@
+import sys
 from typing import Any
 
 from claude_agent_sdk import tool
+
+
+def _log(msg: str) -> None:
+    print(msg, file=sys.stderr, flush=True)
 
 from fli.models import (
     Airport,
@@ -109,6 +114,9 @@ def _format_flight_result(result) -> dict:
     },
 )
 async def search_flights_tool(args: dict[str, Any]) -> dict[str, Any]:
+    route = f"{args['origin']}→{args['destination']}"
+    ret = f" / return {args['return_date']}" if args.get("return_date") else ""
+    _log(f"🔍 search_flights: {route} {args['date']}{ret}")
     try:
         trip_type = _TRIP_MAP.get(args.get("trip_type", "one_way"), TripType.ONE_WAY)
         segments = _build_segments(
@@ -134,6 +142,7 @@ async def search_flights_tool(args: dict[str, Any]) -> dict[str, Any]:
         results = search.search(filters, top_n=args.get("top_n", 5))
 
         if not results:
+            _log(f"  ✗ search_flights: {route} — no results")
             return {"content": [{"type": "text", "text": "No flights found for this route and date."}]}
 
         formatted = []
@@ -143,12 +152,17 @@ async def search_flights_tool(args: dict[str, Any]) -> dict[str, Any]:
             else:
                 formatted.append(_format_flight_result(r))
 
+        prices = [f["price"] if isinstance(f, dict) else f[0]["price"] for f in formatted]
+        _log(f"  ✓ search_flights: {route} — {len(formatted)} results, {min(prices):.0f}–{max(prices):.0f}")
+
         import json
         return {"content": [{"type": "text", "text": json.dumps(formatted, ensure_ascii=False, indent=2)}]}
 
     except KeyError as e:
+        _log(f"  ✗ search_flights: {route} — unknown code: {e}")
         return {"content": [{"type": "text", "text": f"Unknown airport or airline code: {e}"}], "is_error": True}
     except Exception as e:
+        _log(f"  ✗ search_flights: {route} — error: {e}")
         return {"content": [{"type": "text", "text": f"Search error: {e}"}], "is_error": True}
 
 
@@ -172,6 +186,9 @@ async def search_flights_tool(args: dict[str, Any]) -> dict[str, Any]:
     },
 )
 async def search_dates_tool(args: dict[str, Any]) -> dict[str, Any]:
+    route = f"{args['origin']}→{args['destination']}"
+    dur = f", {args['duration_days']}d" if args.get("duration_days") else ""
+    _log(f"🔍 search_dates: {route} {args['from_date']}..{args['to_date']} ({args.get('trip_type', 'one_way')}{dur})")
     try:
         trip_type = _TRIP_MAP.get(args.get("trip_type", "one_way"), TripType.ONE_WAY)
         segments = _build_segments(
@@ -198,6 +215,7 @@ async def search_dates_tool(args: dict[str, Any]) -> dict[str, Any]:
         results = search.search(filters)
 
         if not results:
+            _log(f"  ✗ search_dates: {route} — no results")
             return {"content": [{"type": "text", "text": "No prices found for this route and date range."}]}
 
         formatted = []
@@ -209,10 +227,15 @@ async def search_dates_tool(args: dict[str, Any]) -> dict[str, Any]:
                 "currency": dp.currency,
             })
 
+        prices = [f["price"] for f in formatted]
+        _log(f"  ✓ search_dates: {route} — {len(formatted)} dates, min {min(prices):.0f}, max {max(prices):.0f}")
+
         import json
         return {"content": [{"type": "text", "text": json.dumps(formatted, ensure_ascii=False, indent=2)}]}
 
     except KeyError as e:
+        _log(f"  ✗ search_dates: {route} — unknown code: {e}")
         return {"content": [{"type": "text", "text": f"Unknown airport code: {e}"}], "is_error": True}
     except Exception as e:
+        _log(f"  ✗ search_dates: {route} — error: {e}")
         return {"content": [{"type": "text", "text": f"Date search error: {e}"}], "is_error": True}

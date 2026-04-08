@@ -1,7 +1,12 @@
 import json
+import sys
 from typing import Any
 
 from claude_agent_sdk import tool
+
+
+def _log(msg: str) -> None:
+    print(msg, file=sys.stderr, flush=True)
 
 from flts.db.models import (
     create_watch,
@@ -31,6 +36,7 @@ from flts.db.models import (
     },
 )
 async def add_watch_tool(args: dict[str, Any]) -> dict[str, Any]:
+    _log(f"👁 add_watch: {args['origin']}→{args['destination']} ≤{args['max_price']}")
     try:
         conn = get_connection()
         watch_id = create_watch(
@@ -63,6 +69,7 @@ async def add_watch_tool(args: dict[str, Any]) -> dict[str, Any]:
     },
 )
 async def remove_watch_tool(args: dict[str, Any]) -> dict[str, Any]:
+    _log(f"👁 remove_watch: #{args['watch_id']}")
     conn = get_connection()
     removed = db_remove_watch(conn, args["watch_id"])
     conn.close()
@@ -77,10 +84,12 @@ async def remove_watch_tool(args: dict[str, Any]) -> dict[str, Any]:
     {"type": "object", "properties": {}},
 )
 async def list_watches_tool(args: dict[str, Any]) -> dict[str, Any]:
+    _log("👁 list_watches")
     conn = get_connection()
     watches = db_list_watches(conn)
     conn.close()
 
+    _log(f"  ✓ list_watches: {len(watches)} active")
     if not watches:
         return {"content": [{"type": "text", "text": "No active watches."}]}
 

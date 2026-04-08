@@ -1,7 +1,12 @@
 import os
+import sys
 from typing import Any
 
 from claude_agent_sdk import tool
+
+
+def _log(msg: str) -> None:
+    print(msg, file=sys.stderr, flush=True)
 
 
 @tool(
@@ -19,6 +24,7 @@ from claude_agent_sdk import tool
     },
 )
 async def send_telegram_tool(args: dict[str, Any]) -> dict[str, Any]:
+    _log(f"📨 send_telegram: {len(args['message'])} chars")
     token = os.environ.get("TELEGRAM_BOT_TOKEN")
     chat_id = os.environ.get("TELEGRAM_CHAT_ID")
 

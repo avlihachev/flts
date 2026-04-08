@@ -1,4 +1,5 @@
 import asyncio
+import sys
 
 from dotenv import load_dotenv
 
@@ -20,11 +21,15 @@ async def chat_session(initial_prompt: str | None = None):
 
     server = create_flts_server()
 
+    def _on_stderr(line: str) -> None:
+        print(line, end="", file=sys.stderr, flush=True)
+
     options = ClaudeAgentOptions(
         system_prompt=SYSTEM_PROMPT,
         mcp_servers={"flts": server},
         allowed_tools=["mcp__flts__*"],
         max_turns=50,
+        stderr=_on_stderr,
     )
 
     if initial_prompt:
@@ -62,6 +67,7 @@ async def _interactive_loop(options: ClaudeAgentOptions):
             mcp_servers={"flts": options.mcp_servers["flts"]},
             allowed_tools=["mcp__flts__*"],
             max_turns=50,
+            stderr=options.stderr,
         )
         if session_id:
             opts.resume = session_id
@@ -78,13 +84,13 @@ def _print_message(message):
     if isinstance(message, AssistantMessage):
         for block in message.content:
             if isinstance(block, TextBlock):
-                print(block.text)
+                print(block.text, flush=True)
             elif isinstance(block, ToolUseBlock):
-                print(f"  [tool] {block.name}")
+                print(f"  [tool] {block.name}", flush=True)
     elif isinstance(message, ResultMessage):
         if message.is_error and message.errors:
             for err in message.errors:
-                print(f"Error: {err}")
+                print(f"Error: {err}", flush=True)
 
 
 def main(prompt: str | None = None):
