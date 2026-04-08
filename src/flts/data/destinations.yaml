@@ -1,0 +1,240 @@
+warm_beach:
+  - code: BKK
+    name: Bangkok
+    region: southeast_asia
+  - code: HKT
+    name: Phuket
+    region: southeast_asia
+  - code: KUL
+    name: Kuala Lumpur
+    region: southeast_asia
+  - code: DPS
+    name: Bali (Denpasar)
+    region: southeast_asia
+  - code: CMB
+    name: Colombo
+    region: south_asia
+  - code: MLE
+    name: Maldives (Male)
+    region: south_asia
+  - code: GOI
+    name: Goa
+    region: south_asia
+  - code: CAN
+    name: Cancun
+    region: caribbean
+  - code: PUJ
+    name: Punta Cana
+    region: caribbean
+  - code: HRG
+    name: Hurghada
+    region: middle_east
+  - code: SSH
+    name: Sharm El Sheikh
+    region: middle_east
+  - code: AYT
+    name: Antalya
+    region: turkey
+  - code: DLM
+    name: Dalaman
+    region: turkey
+  - code: HER
+    name: Heraklion (Crete)
+    region: greece
+  - code: RHO
+    name: Rhodes
+    region: greece
+  - code: PMI
+    name: Palma de Mallorca
+    region: spain
+  - code: TFS
+    name: Tenerife South
+    region: canary_islands
+  - code: LPA
+    name: Gran Canaria
+    region: canary_islands
+  - code: FAO
+    name: Faro (Algarve)
+    region: portugal
+
+europe_city:
+  - code: BCN
+    name: Barcelona
+    region: spain
+  - code: FCO
+    name: Rome
+    region: italy
+  - code: NAP
+    name: Naples
+    region: italy
+  - code: VCE
+    name: Venice
+    region: italy
+  - code: CDG
+    name: Paris
+    region: france
+  - code: AMS
+    name: Amsterdam
+    region: netherlands
+  - code: BER
+    name: Berlin
+    region: germany
+  - code: MUC
+    name: Munich
+    region: germany
+  - code: VIE
+    name: Vienna
+    region: austria
+  - code: PRG
+    name: Prague
+    region: czech_republic
+  - code: BUD
+    name: Budapest
+    region: hungary
+  - code: WAW
+    name: Warsaw
+    region: poland
+  - code: KRK
+    name: Krakow
+    region: poland
+  - code: ATH
+    name: Athens
+    region: greece
+  - code: LIS
+    name: Lisbon
+    region: portugal
+  - code: DUB
+    name: Dublin
+    region: ireland
+  - code: EDI
+    name: Edinburgh
+    region: uk
+  - code: IST
+    name: Istanbul
+    region: turkey
+  - code: RIX
+    name: Riga
+    region: latvia
+  - code: TLL
+    name: Tallinn
+    region: estonia
+
+asia:
+  - code: BKK
+    name: Bangkok
+    region: thailand
+  - code: HKT
+    name: Phuket
+    region: thailand
+  - code: CNX
+    name: Chiang Mai
+    region: thailand
+  - code: SGN
+    name: Ho Chi Minh City
+    region: vietnam
+  - code: HAN
+    name: Hanoi
+    region: vietnam
+  - code: KUL
+    name: Kuala Lumpur
+    region: malaysia
+  - code: SIN
+    name: Singapore
+    region: singapore
+  - code: DPS
+    name: Bali
+    region: indonesia
+  - code: CGK
+    name: Jakarta
+    region: indonesia
+  - code: NRT
+    name: Tokyo (Narita)
+    region: japan
+  - code: KIX
+    name: Osaka (Kansai)
+    region: japan
+  - code: ICN
+    name: Seoul (Incheon)
+    region: south_korea
+  - code: HKG
+    name: Hong Kong
+    region: china
+  - code: PVG
+    name: Shanghai
+    region: china
+  - code: DEL
+    name: Delhi
+    region: india
+  - code: CMB
+    name: Colombo
+    region: sri_lanka
+
+nordic:
+  - code: ARN
+    name: Stockholm (Arlanda)
+    region: sweden
+  - code: CPH
+    name: Copenhagen
+    region: denmark
+  - code: OSL
+    name: Oslo
+    region: norway
+  - code: BGO
+    name: Bergen
+    region: norway
+  - code: TRD
+    name: Trondheim
+    region: norway
+  - code: KEF
+    name: Reykjavik (Keflavik)
+    region: iceland
+  - code: RVN
+    name: Rovaniemi
+    region: finland
+  - code: TKU
+    name: Turku
+    region: finland
+
+budget:
+  - code: ATH
+    name: Athens
+    region: greece
+  - code: SOF
+    name: Sofia
+    region: bulgaria
+  - code: OTP
+    name: Bucharest
+    region: romania
+  - code: BEG
+    name: Belgrade
+    region: serbia
+  - code: SKP
+    name: Skopje
+    region: north_macedonia
+  - code: TIA
+    name: Tirana
+    region: albania
+  - code: WAW
+    name: Warsaw
+    region: poland
+  - code: BUD
+    name: Budapest
+    region: hungary
+  - code: RIX
+    name: Riga
+    region: latvia
+  - code: TLL
+    name: Tallinn
+    region: estonia
+  - code: VNO
+    name: Vilnius
+    region: lithuania
+  - code: AYT
+    name: Antalya
+    region: turkey
+  - code: HRG
+    name: Hurghada
+    region: egypt
+  - code: RAK
+    name: Marrakech
+    region: morocco
