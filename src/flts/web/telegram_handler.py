@@ -3,13 +3,41 @@ import os
 import re
 
 from telegram import Bot, Update
+from telegram.request import HTTPXRequest
 
 from flts.db.models import get_connection, list_watches, remove_watch
 from flts.web.agent_runner import AgentEvent, run_agent_query
 
+_chat_sessions: dict[int, str] = {}  # telegram chat_id -> agent session_id
+
+
+def _make_bot(token: str) -> Bot:
+    return Bot(token, request=HTTPXRequest(read_timeout=60, write_timeout=60, connect_timeout=30))
+
+
+def _md_to_html(text: str) -> str:
+    """Convert agent markdown to Telegram HTML."""
+    from html import escape
+
+    # extract markdown links before escaping
+    link_re = re.compile(r"\[([^\]]+)\]\((https?://[^\)]+)\)")
+    parts = []
+    last = 0
+    for m in link_re.finditer(text):
+        parts.append(escape(text[last:m.start()]))
+        parts.append(f'<a href="{escape(m.group(2))}">{escape(m.group(1))}</a>')
+        last = m.end()
+    parts.append(escape(text[last:]))
+    result = "".join(parts)
+
+    # bold: *text* or **text** → <b>text</b>
+    result = re.sub(r"\*\*(.+?)\*\*", r"<b>\1</b>", result)
+    result = re.sub(r"\*(.+?)\*", r"<b>\1</b>", result)
+    return result
+
 
 def _format_compact(events: list[AgentEvent]) -> str:
-    """Extract text events and return a compact Telegram-friendly message."""
+    """Extract text events and return a compact Telegram HTML message."""
     texts = [e.data for e in events if e.type == "text" and e.data.strip()]
     full = "\n".join(texts)
 
@@ -20,11 +48,15 @@ def _format_compact(events: list[AgentEvent]) -> str:
             continue
         if line.strip().startswith("|-") or line.strip().startswith("| -"):
             continue
+        # strip markdown headers
+        line = re.sub(r"^#{1,3}\s+", "", line)
         lines.append(line)
 
     result = "\n".join(lines).strip()
     # collapse multiple blank lines
     result = re.sub(r"\n{3,}", "\n\n", result)
+    # convert to HTML
+    result = _md_to_html(result)
     # trim to 4000 chars (Telegram limit is 4096)
     if len(result) > 4000:
         result = result[:4000] + "\n..."
@@ -37,13 +69,18 @@ async def handle_telegram_message(update_data: dict) -> None:
     if not token:
         return
 
-    update = Update.de_json(update_data, Bot(token))
+    update = Update.de_json(update_data, _make_bot(token))
     if not update or not update.message or not update.message.text:
         return
 
     text = update.message.text.strip()
     chat_id = update.message.chat_id
-    bot = Bot(token)
+    bot = _make_bot(token)
+
+    # only allow the configured chat
+    allowed = os.environ.get("TELEGRAM_CHAT_ID", "")
+    if allowed and str(chat_id) != allowed:
+        return
 
     # handle commands
     if text == "/watches":
@@ -61,6 +98,11 @@ async def handle_telegram_message(update_data: dict) -> None:
                 f"≤{w['max_price']} {w['currency']}{price_info}"
             )
         await bot.send_message(chat_id, "\n".join(lines))
+        return
+
+    if text == "/new":
+        _chat_sessions.pop(chat_id, None)
+        await bot.send_message(chat_id, "Начинаю новую беседу.")
         return
 
     if text.startswith("/stop"):
@@ -81,7 +123,10 @@ async def handle_telegram_message(update_data: dict) -> None:
     queue: asyncio.Queue[AgentEvent] = asyncio.Queue()
     collected: list[AgentEvent] = []
 
-    await run_agent_query(text, queue)
+    session_id = _chat_sessions.get(chat_id)
+    new_session_id = await run_agent_query(text, queue, session_id=session_id)
+    if new_session_id:
+        _chat_sessions[chat_id] = new_session_id
 
     while True:
         event = await queue.get()
@@ -93,4 +138,4 @@ async def handle_telegram_message(update_data: dict) -> None:
     if not result:
         result = "Не удалось получить результат."
 
-    await bot.send_message(chat_id, result)
+    await bot.send_message(chat_id, result, parse_mode="HTML")

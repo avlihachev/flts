@@ -121,6 +121,14 @@ All user data lives in `~/.flts/`:
 
 Nothing is stored inside the project directory.
 
+## Security notes
+
+This is a **single-user tool** designed to run locally.
+
+- **Web UI** has no authentication. `flts serve` binds to `127.0.0.1` by default — do not expose it to the internet without adding auth middleware
+- **Telegram bot** only responds to the `TELEGRAM_CHAT_ID` configured in `.env`. Set `TELEGRAM_WEBHOOK_SECRET` if exposing the webhook endpoint publicly
+- **Claude API costs** — each chat session runs a full Claude agent loop. Unauthenticated access to `/api/chat` or the Telegram bot would consume your tokens
+
 ## Disclaimer
 
 This project uses the [fli](https://github.com/punitarani/fli) library which accesses Google Flights data through an unofficial API. This is not affiliated with or endorsed by Google. Use at your own risk and be aware of Google's Terms of Service. The flight data may be incomplete or inaccurate.
