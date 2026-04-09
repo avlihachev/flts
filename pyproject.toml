@@ -30,7 +30,7 @@ dev = [
 flts = "flts.cli:cli"
 
 [project.urls]
-Repository = "https://github.com/lihachev/flts"
+Repository = "https://github.com/avlihachev/flts"
 
 [build-system]
 requires = ["hatchling"]
