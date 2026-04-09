@@ -1,4 +1,5 @@
 import asyncio
+import sys
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -70,7 +71,8 @@ async def run_agent_query(
                     )
                 event_queue.put_nowait(AgentEvent(type="done", metadata=meta))
     except Exception as e:
-        event_queue.put_nowait(AgentEvent(type="error", data=str(e)))
+        print(f"Agent error: {e}", file=sys.stderr, flush=True)
+        event_queue.put_nowait(AgentEvent(type="error", data="Internal error occurred"))
         event_queue.put_nowait(AgentEvent(type="done"))
 
     return result_session_id
