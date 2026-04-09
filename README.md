@@ -76,14 +76,50 @@ Monitor daemon (separate process) ---> fli library ---> Telegram alerts
 
 Two processes: `flts serve` (web + telegram + agent) and `flts monitor` (background price checker).
 
+## Prerequisites
+
+- Python 3.12+
+- [uv](https://docs.astral.sh/uv/) package manager
+- [Claude Code](https://docs.anthropic.com/en/docs/claude-code) installed and authenticated (the agent uses your local OAuth session — no API key needed)
+
+## Setup
+
+```bash
+git clone https://github.com/lihachev/flts.git
+cd flts
+uv sync
+```
+
+For Telegram notifications (optional):
+
+```bash
+cp .env.example .env
+# edit .env — add your TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID
+# add TELEGRAM_WEBHOOK_SECRET if exposing the webhook publicly
+```
+
 ## Running
 
 ```bash
-uv sync
+flts chat               # interactive flight search in terminal
+flts chat "cheap flights from Helsinki to Bangkok in November"  # one-shot query
 flts serve              # web UI at localhost:8000
-flts chat               # terminal chat
-flts monitor            # start price monitoring daemon
+flts monitor            # background price monitoring daemon
+flts watches            # list active price watches
+flts history HEL BKK    # price history for a route
 ```
+
+## Data storage
+
+All user data lives in `~/.flts/`:
+
+| File | Purpose |
+|------|---------|
+| `flts.db` | SQLite — price watches and history |
+| `skill.md` | Agent preferences and search strategies (created on first run) |
+| `journal.jsonl` | Search log with price trends |
+
+Nothing is stored inside the project directory.
 
 ## Disclaimer
 
