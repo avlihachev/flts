@@ -3,6 +3,11 @@ name = "flts"
 version = "0.1.0"
 description = "Flight search agent powered by Claude Agent SDK and Google Flights"
 requires-python = ">=3.12"
+license = "MIT"
+authors = [
+    { name = "Aleksei Likhachev" },
+]
+keywords = ["flights", "travel", "ai-agent", "claude", "google-flights"]
 dependencies = [
     "claude-agent-sdk>=0.1.0",
     "flights>=0.8.0",
@@ -23,6 +28,9 @@ dev = [
 
 [project.scripts]
 flts = "flts.cli:cli"
+
+[project.urls]
+Repository = "https://github.com/lihachev/flts"
 
 [build-system]
 requires = ["hatchling"]
