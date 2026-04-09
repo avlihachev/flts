@@ -5,7 +5,7 @@ description = "Flight search agent powered by Claude Agent SDK and Google Flight
 requires-python = ">=3.12"
 license = "MIT"
 authors = [
-    { name = "Aleksei Likhachev" },
+    { name = "Aleksandr Likhachev" },
 ]
 keywords = ["flights", "travel", "ai-agent", "claude", "google-flights"]
 dependencies = [
