@@ -25,7 +25,7 @@ from flts.db.models import (
     update_watch_checked,
 )
 
-JOURNAL_PATH = Path(__file__).parent.parent / "data" / "journal.jsonl"
+JOURNAL_PATH = Path.home() / ".flts" / "journal.jsonl"
 
 
 def _check_watch(watch: dict) -> list[dict]:
