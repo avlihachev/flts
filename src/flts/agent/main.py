@@ -45,7 +45,7 @@ async def _run_query(prompt: str, options: ClaudeAgentOptions):
 
 async def _interactive_loop(options: ClaudeAgentOptions):
     print("flts — поиск дешёвых авиабилетов")
-    print("Введи запрос или 'exit' для выхода\n")
+    print("Введи запрос, /new для новой беседы, exit для выхода\n")
 
     session_id = None
 
@@ -61,6 +61,10 @@ async def _interactive_loop(options: ClaudeAgentOptions):
         if user_input.lower() in ("exit", "quit", "выход"):
             print("До свидания!")
             break
+        if user_input.lower() == "/new":
+            session_id = None
+            print("Новая беседа.\n")
+            continue
 
         opts = ClaudeAgentOptions(
             system_prompt=SYSTEM_PROMPT,
