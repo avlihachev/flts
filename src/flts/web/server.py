@@ -1,5 +1,6 @@
 import asyncio
 import json
+import os
 import uuid
 from pathlib import Path
 
@@ -97,8 +98,23 @@ async def api_history(origin: str, destination: str, days: int = 30):
     return result
 
 
+DEMO_FILE = Path(__file__).parent / "frontend" / "demo.html"
+
+
+@app.get("/demo")
+async def demo():
+    if DEMO_FILE.exists():
+        return HTMLResponse(DEMO_FILE.read_text())
+    return HTMLResponse("Demo not found", status_code=404)
+
+
 @app.post("/api/telegram/webhook")
 async def telegram_webhook(request: Request):
+    secret = os.environ.get("TELEGRAM_WEBHOOK_SECRET", "")
+    if secret:
+        header = request.headers.get("X-Telegram-Bot-Api-Secret-Token", "")
+        if header != secret:
+            return HTMLResponse("Forbidden", status_code=403)
     data = await request.json()
     asyncio.create_task(handle_telegram_message(data))
     return {"ok": True}
