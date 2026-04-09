@@ -1,15 +1,16 @@
 import asyncio
 import json
 import os
+import time
 import uuid
 from pathlib import Path
 
 from dotenv import load_dotenv
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Query, Request
 from flts.web.telegram_handler import handle_telegram_message
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from sse_starlette.sse import EventSourceResponse
 
 from flts.db.models import (
@@ -29,18 +30,31 @@ FRONTEND_DIR = Path(__file__).parent / "frontend" / "dist"
 # in-memory session store
 _sessions: dict[str, str | None] = {}  # chat_id -> agent session_id
 _queues: dict[str, asyncio.Queue[AgentEvent]] = {}
+_session_created: dict[str, float] = {}
+SESSION_TTL = 3600  # 1 hour
+
+
+def _cleanup_sessions():
+    now = time.time()
+    stale = [cid for cid, ts in _session_created.items() if now - ts > SESSION_TTL]
+    for cid in stale:
+        _sessions.pop(cid, None)
+        _queues.pop(cid, None)
+        _session_created.pop(cid, None)
 
 
 class ChatRequest(BaseModel):
-    prompt: str
+    prompt: str = Field(max_length=10000)
     chat_id: str | None = None
 
 
 @app.post("/api/chat")
 async def chat(req: ChatRequest):
+    _cleanup_sessions()
     chat_id = req.chat_id or str(uuid.uuid4())
     queue: asyncio.Queue[AgentEvent] = asyncio.Queue()
     _queues[chat_id] = queue
+    _session_created[chat_id] = time.time()
 
     agent_session = _sessions.get(chat_id)
 
@@ -91,7 +105,7 @@ async def api_remove_watch(watch_id: int):
 
 
 @app.get("/api/history/{origin}/{destination}")
-async def api_history(origin: str, destination: str, days: int = 30):
+async def api_history(origin: str, destination: str, days: int = Query(default=30, ge=1, le=365)):
     conn = get_connection()
     result = get_price_history(conn, origin.upper(), destination.upper(), days_back=days)
     conn.close()
